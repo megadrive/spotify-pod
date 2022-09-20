@@ -13,7 +13,7 @@ const spotify = SpotifyProvider({
   authorization: { params: { scope: "user-read-email playlist-read-private" } },
 });
 
-export async function getOrUpdateRefreshToken(account: Account) {
+export async function updateRefreshToken(account: Account) {
   try {
     if (account.expires_at && account.expires_at > Date.now()) {
       return account;
@@ -64,9 +64,10 @@ export async function getOrUpdateRefreshToken(account: Account) {
       },
     });
 
-    return !!updatedAccount;
+    return updatedAccount ? true : false;
   } catch (error) {
     console.error("Couldn't refresh token");
+    return false;
   }
 }
 

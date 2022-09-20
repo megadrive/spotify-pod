@@ -2,10 +2,35 @@ import type { NextPage } from "next";
 import { signIn, signOut } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
+import { useState } from "react";
+import { Spinner } from "../component/Spinner";
 import { trpc } from "../utils/trpc";
+
+const ButtonWithLoading = ({
+  children,
+  onClick,
+  loading = false,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  loading?: boolean;
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className={`${
+        loading ? "w-44 grid justify-center" : "w-96 hover:bg-green-400"
+      } bg-black text-white font-semibold text-2xl px-6 py-3 my-1 border-4 border-black hover:-rotate-1 disabled:bg-green-400 disabled:rotate-2 text-center transition-all ease-in duration-100`}
+    >
+      {loading ? <Spinner /> : children}
+    </button>
+  );
+};
 
 const Home: NextPage = () => {
   const session = trpc.useQuery(["auth.get-session"]);
+  const [loading, setLoading] = useState(false);
 
   return (
     <>
@@ -19,23 +44,27 @@ const Home: NextPage = () => {
         {session.data ? (
           <div>
             <Link href="/play">
-              <button className="w-32 bg-black text-white font-extrabold text-4xl px-6 py-3 border-green-900 border-2 rounded-lg hover:bg-green-400">
+              <ButtonWithLoading
+                loading={loading}
+                onClick={() => setLoading(true)}
+              >
                 Play!
-              </button>
+              </ButtonWithLoading>
             </Link>
 
             <button onClick={() => signOut()}>Log out</button>
           </div>
         ) : (
           <>
-            <button
+            <ButtonWithLoading
+              loading={loading}
               onClick={() => {
+                setLoading(true);
                 signIn("spotify");
               }}
-              className="w-auto bg-black text-white font-extrabold text-4xl px-6 py-3 border-green-900 border-2 rounded-lg hover:bg-green-400"
             >
               Sign in with Spotify
-            </button>
+            </ButtonWithLoading>
           </>
         )}
       </main>
